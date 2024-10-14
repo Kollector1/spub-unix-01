@@ -1,30 +1,63 @@
 #!/bin/bash
 
-options=()
 parameters=()
 fl=false
+is_a=false
+is_b=false
+last="none"
 
-for arg in "$@"
+for arg in "$@" 
 do
-  if [ "$arg" == "--" ]; then
-    fl=true
-  elif $fl; then
-	parameters+=("$arg")
-  elif [[ "$arg" == -* ]]; then
-    options+=("$arg")
-  else
-    parameters+=("$arg")
-  fi
+  case "$arg" in 
+	"--")
+	  fl=true
+	  ;;
+	"--help")
+	  echo "scriptname [-a] [-v] [--] pars..."
+	  exit 0
+	  ;;
+	"--version")
+	  echo "version 0.0.1"
+	  echo "author: Андрей"
+	  exit 0
+	  ;;
+	*)
+	  if $fl ; then 
+		parameters+=("$arg")
+		last="none"
+	  elif [[ "$arg" != -* ]] ; then
+		parameters+=("$arg")
+		if [[ "$last" == "-a" ]] ; then 
+		  is_a=true
+		elif [[ "$last" == "-b" ]] ; then 
+		  is_b=true
+		fi
+	  else
+		if [[ "$arg" != "-a" && "$arg" != "-b" ]] ; then
+		  echo "опция $arg не поддерживается" >&2
+		  exit 1
+		else
+		  last="$arg"
+		fi
+	  fi
+	  ;;
+  esac
 done
 
-echo "options:"
-for option in "${options[@]}"
+if $is_a ; then 
+  echo "-a задана"
+else 
+  echo "-a не задана"
+fi
+
+if $is_b ; then 
+  echo "-b задана"
+else 
+  echo "-b не задана"
+fi
+
+for par in "${parameters[@]}"
 do
-    echo "$option"
+  echo "$par"
 done
 
-echo "parameters:"
-for parameter in "${parameters[@]}"
-do
-    echo "$parameter"
-done
